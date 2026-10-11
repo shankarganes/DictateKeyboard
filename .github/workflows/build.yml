@@ -6,9 +6,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository with LFS
         uses: actions/checkout@v4
+        with:
+          lfs: true
+          submodules: recursive
+
+      - name: Pull Git LFS Objects
+        run: git lfs pull
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -22,11 +29,12 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Build Debug Phone APK
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: DictateKeyboard-Debug
           path: app/build/outputs/apk/**/*.apk
